@@ -1,0 +1,76 @@
+{
+  "geode": "5.10.1",
+  "gd": {
+    "win": "2.2081",
+    "mac": "2.2081"
+  },
+  "version": "v0.1.0",
+  "id": "declan.auto_frame_window",
+  "name": "Auto Frame Window",
+  "developer": "Declan",
+  "description": "Measures the frame window of every input in a run automatically.",
+  "settings": {
+    "tps": {
+      "type": "int",
+      "default": 240,
+      "min": 60,
+      "max": 2400,
+      "name": "TPS",
+      "description": "Physics tick rate used to convert level time to frames. 240 for stock GD."
+    },
+    "checkpoint-interval": {
+      "type": "int",
+      "default": 60,
+      "min": 10,
+      "max": 600,
+      "name": "Checkpoint interval (frames)",
+      "description": "How often practice checkpoints are laid during the replay pass. Smaller = shorter trials but more checkpoints."
+    },
+    "lead-frames": {
+      "type": "int",
+      "default": 24,
+      "min": 1,
+      "max": 240,
+      "name": "Lead frames",
+      "description": "Minimum frames between the start checkpoint and the earliest shifted input."
+    },
+    "lookahead-frames": {
+      "type": "int",
+      "default": 90,
+      "min": 10,
+      "max": 1200,
+      "name": "Lookahead (frames)",
+      "description": "A trial counts as survived if the player is alive this many frames past the input (and past the next input)."
+    },
+    "max-shift": {
+      "type": "int",
+      "default": 48,
+      "min": 1,
+      "max": 480,
+      "name": "Max shift",
+      "description": "Stop probing an input after this many frames early/late. Windows larger than this are reported as capped."
+    },
+    "analysis-speed": {
+      "type": "float",
+      "default": 3.0,
+      "min": 0.25,
+      "max": 20.0,
+      "name": "Analysis speed",
+      "description": "Time multiplier while the analysis runs. Physics still tick at TPS."
+    },
+    "remove-checkpoint-arg": {
+      "type": "bool",
+      "default": false,
+      "name": "removeCheckpoint arg",
+      "description": "Value passed to PlayLayer::removeCheckpoint(bool first) to remove the NEWEST checkpoint. Flip this if the log says the wrong checkpoint was removed."
+    },
+    "inject-offset": {
+      "type": "int",
+      "default": 0,
+      "min": -3,
+      "max": 3,
+      "name": "Inject offset (frames)",
+      "description": "Added to every replayed input frame. Leave 0 unless the replay pass keeps desyncing on a run you know is deterministic; then try -1 or +1."
+    }
+  }
+}
