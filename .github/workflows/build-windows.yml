@@ -1,0 +1,39 @@
+# Add this file as .github/workflows/build-windows.yml in your GitHub fork.
+# Actions -> Build Auto Frame Window for Windows -> Run workflow.
+# This builds the upstream prototype; gameplay and compilation are unverified.
+name: Build Auto Frame Window for Windows
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - name: Download original source
+        uses: actions/checkout@v4
+        with:
+          repository: declanjhaveri-cloud/Auto-frame-window-counter
+          ref: 4f44aec20be3872b25926492cbe57ac7c5e48ca0
+          persist-credentials: false
+
+      - name: Build Windows mod
+        id: build
+        uses: geode-sdk/build-geode-mod@a0f7676e6fcd1a584f6d0c1c800239008412defc
+        with:
+          sdk: v5.10.1
+          target: Win64
+          bindings-ref: f8aec5d1f3df76d840dfd2609f02cef30dc6efdf
+          configure-args: '-DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=ON'
+
+      - name: Upload mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: Auto-Frame-Window-Windows
+          path: ${{ steps.build.outputs.build-output }}
+          if-no-files-found: error
+          retention-days: 14
