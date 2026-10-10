@@ -1,7 +1,7 @@
 # Add this file as .github/workflows/build-windows.yml in your GitHub fork.
 # Actions -> Build Auto Frame Window for Windows -> Run workflow.
-# This builds the upstream prototype; gameplay and compilation are unverified.
-name: Build Auto Frame Window for Windows
+# Checkpoint workaround: each trial replays from the start. Slower; gameplay unverified.
+name: Build Auto Frame Window - checkpoint fix
 
 on:
   workflow_dispatch:
@@ -21,6 +21,30 @@ jobs:
           ref: 4f44aec20be3872b25926492cbe57ac7c5e48ca0
           persist-credentials: false
 
+      - name: Apply checkpoint workaround
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("src/main.cpp")
+          source = p.read_text(encoding="utf-8")
+          start = source.index("static bool prepareCheckpoints(PlayLayer* pl, AFW& s) {")
+          end = source.index("// After a reset:", start)
+          source = source[:start] + """static bool prepareCheckpoints(PlayLayer* pl, AFW& s) {
+              // Full replay from the start avoids relying on checkpoint removal/restoration.
+              pl->removeAllCheckpoints();
+              s.cpFrames.clear();
+              s.cpObjs.clear();
+              return true;
+          }
+
+          """ + source[end:]
+          start = source.index("        if (s.phase == Phase::Laying && !m_player1->m_isDead) {")
+          end = source.index("        if (auto hud = m_fields->hud)", start)
+          source = source[:start] + source[end:]
+          assert "this->markCheckpoint()" not in source
+          assert "pl->removeCheckpoint(cfgRemoveArg())" not in source
+          p.write_text(source, encoding="utf-8")
+
       - name: Build Windows mod
         id: build
         uses: geode-sdk/build-geode-mod@a0f7676e6fcd1a584f6d0c1c800239008412defc
@@ -33,7 +57,7 @@ jobs:
       - name: Upload mod
         uses: actions/upload-artifact@v4
         with:
-          name: Auto-Frame-Window-Windows
+          name: Auto-Frame-Window-Windows-checkpoint-fix
           path: ${{ steps.build.outputs.build-output }}
           if-no-files-found: error
           retention-days: 14
